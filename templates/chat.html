@@ -10,6 +10,44 @@
 </head>
 
 <body>
-  
+  <h1>Greetings {{ user.username }}! I am your personal AI assistant.</h1>
+
+  <form id="chat-form" method="post">
+    <label for="prompt">Enter your question or command:</label><br>
+    <textarea id="prompt" name="prompt" rows="5" cols="60" required></textarea><br><br>
+    <button class="generate_button" type="submit">Send</button>
+  </form>
+
+  <div id="chat-box"></div>
+
+  <a href="{{ url_for('dashboard') }}">Return to dashboard</a>
+  <a href="{{ url_for('logout') }}">Press here to logout!</a>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const promptInput = document.getElementById('prompt');
+      const userPrompt = promptInput.value.trim();
+
+      if (!userPrompt) return;
+
+      chatBox.innerHTML += `<p><strong>You:</strong><br>${userPrompt.replace(/\n/g, '<br>')}</p>`;
+      promptInput.value = "";
+
+      const response = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userPrompt })
+      });
+
+      const result = await response.json();
+      const formattedResponse = (result.response || result.error || "No response").replace(/\n/g, '<br>');
+
+      chatBox.innerHTML += `<p><strong>AI:</strong><br>${formattedResponse}</p>`;
+    });
+  </script>
 </body>
 </html>
