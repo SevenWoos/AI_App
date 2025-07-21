@@ -10,7 +10,9 @@
 </head>
 
 <body>
-  <h1>Dashboard</h1>
+  <h1>Welcome {{ user.username }}!</h1>
+
+  <a href="{{url_for('chat.chat')}}"> Go to your personal scheduling AI!</a>
 
   <a href="{{url_for('logout')}}">Press here to logout!</a>
   
