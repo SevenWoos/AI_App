@@ -24,3 +24,6 @@ delete.html
 deleted_routes.py
 test.py
 delete.py
+
+# env
+.env
