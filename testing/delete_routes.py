@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, session, jsonify, Blueprint
 from flask_login import login_required, current_user
-import requests
+import requests 
 import os
 
 chat_bp = Blueprint('chat', __name__)
@@ -15,7 +15,6 @@ def chat():
         if not user_input:
             return jsonify({"error": "Prompt cannot be empty."}), 400
         
-
         try:
             response = requests.post(
                 'http://localhost:11434/api/generate', 
@@ -25,15 +24,13 @@ def chat():
                     "stream": False
                 }
             )
-
         except requests.exceptions.ConnectionError:
             return jsonify({"error": "Could not connect to local AI model"}), 500
         
         if response.status_code != 200:
-            return jsonify({"error": "AI model failed", "details": response.text}), 500
+            return jsonify({"error": "AI model failed.", "details": response.text}), 500
         
-
         data = response.json()
-        return jsonify({"response": data.get("response", "")})
-
+        return jsonify({"response": data.get("response", "")}), 200
+    
     return render_template('chat.html', user=current_user)
