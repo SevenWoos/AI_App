@@ -14,7 +14,7 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-app.config['SECRETKEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
@@ -29,7 +29,7 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(50), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
 
@@ -39,7 +39,7 @@ class RegisterForm(FlaskForm):
     )], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[InputRequired(), Length(
-        min=4, max=80
+        min=4, max=50
     )], render_kw={"placeholder": "Password"})
 
     submit = SubmitField("Register")
@@ -49,9 +49,8 @@ class RegisterForm(FlaskForm):
             username=username.data).first()
         if existing_username:
             raise ValidationError(
-                "That username already exists. Please choose a different one!"
+                "That username already exists! Please choose a different one."
             )
-        
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(
@@ -59,7 +58,7 @@ class LoginForm(FlaskForm):
     )], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[InputRequired(), Length(
-        min=4, max=80
+        min=4, max=50
     )], render_kw={"placeholder": "Password"})
 
     submit = SubmitField("Login")
@@ -98,7 +97,6 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
-
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
         new_user = User(username=form.username.data, password=hashed_password)
@@ -106,11 +104,11 @@ def register():
         db.session.commit()
 
         return redirect(url_for('login'))
-
+    
     return render_template('register.html', form=form)
 
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin_dashboard():
     if not current_user.is_admin:
@@ -118,11 +116,9 @@ def admin_dashboard():
         return redirect(url_for('home'))
     return render_template('admin_dashboard.html', user=current_user)
 
-
 from routes import chat_bp
 app.register_blueprint(chat_bp)
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
